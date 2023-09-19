@@ -48,14 +48,13 @@ void *naive_malloc(size_t size)
 {
 	void *new_block;
 
-	size = align_size(size);
-
 	size_t total_size = size + sizeof(size_t);
 
 	size_t page_size = get_page_size();
 
 	size_t pages_needed = total_size / page_size + (total_size %
 							page_size != 0);
+	size = align_size(size);
 
 	new_block = sbrk(pages_needed * page_size);
 
