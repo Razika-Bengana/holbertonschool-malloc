@@ -16,13 +16,14 @@
 
 void _free(void *ptr)
 {
+	size_t *block_header;
 
 	if (!ptr)
 	{
 		return;
 	}
 
-    size_t *block_header = (size_t *)((unsigned char *)ptr - sizeof(size_t));
+	*block_header = (size_t *)((unsigned char *)ptr - sizeof(size_t));
 
-    *block_header = 0;
+	*block_header = 0;
 }
