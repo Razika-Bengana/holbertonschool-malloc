@@ -46,15 +46,15 @@ size_t align_size(size_t size)
 
 void *_malloc(size_t size)
 {
-	static void *current_break, *heap_start, *page_end;
-	void *new_block, *block_ptr;
+	static void *current_break, *page_end;
+	void *block_ptr;
 	size_t block_size, total_size, page_size, pages_needed;
 
 	size = align_size(size);
 	total_size = size + sizeof(size_t);
 	page_size = get_page_size();
 
-	block_ptr = heap_start;
+	block_ptr = current_break;
 	while (block_ptr && block_ptr < page_end)
 	{
 		block_size = *((size_t *)block_ptr);
@@ -62,11 +62,13 @@ void *_malloc(size_t size)
 		if (block_size == 0 && (unsigned char *)block_ptr + total_size
 		    <= (unsigned char *)page_end)
 		{
+
 			*((size_t *)block_ptr) = size;
 			return ((unsigned char *)block_ptr + sizeof(size_t));
 		}
 
-		block_ptr = (unsigned char *)block_ptr + block_size + sizeof(size_t);
+		block_ptr = (unsigned char *)block_ptr + block_size +
+			sizeof(size_t);
 	}
 
 	if (current_break == NULL || (unsigned char *)current_break +
@@ -74,29 +76,24 @@ void *_malloc(size_t size)
 	{
 		pages_needed = total_size / page_size + (total_size %
 							 page_size != 0);
-		new_block = sbrk(pages_needed * page_size);
 
-		if (new_block == (void *)-1)
+		block_ptr = sbrk(pages_needed * page_size);
+		if (block_ptr == (void *)-1)
 		{
 			perror("naive_malloc: sbrk failed");
 			return (NULL);
 		}
-
-		current_break = new_block;
-		page_end = (unsigned char *)new_block + pages_needed *
+		current_break = block_ptr;
+		page_end = (unsigned char *)block_ptr + pages_needed *
 			page_size;
-
-		if (heap_start == NULL)
-		{
-			heap_start = new_block;
-		}
 	}
 	else
 	{
-		new_block = current_break;
+		block_ptr = current_break;
 	}
 
-	*((size_t *)new_block) = size;
-	current_break = (unsigned char *)new_block + total_size;
-	return ((unsigned char *)new_block + sizeof(size_t));
+	*((size_t *)block_ptr) = size;
+	current_break = (unsigned char *)block_ptr + total_size;
+
+	return ((unsigned char *)block_ptr + sizeof(size_t));
 }
