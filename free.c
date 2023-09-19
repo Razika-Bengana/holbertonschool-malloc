@@ -23,7 +23,7 @@ void _free(void *ptr)
 		return;
 	}
 
-	*block_header = (size_t *)((unsigned char *)ptr - sizeof(size_t));
+	block_header = (size_t *)((unsigned char *)ptr - sizeof(size_t));
 
 	*block_header = 0;
 }
