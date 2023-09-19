@@ -1,4 +1,4 @@
-#include "main.h"
+#include "malloc.h"
 
 /**
  * _free - program that frees a block of memory previously allocated
